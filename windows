@@ -1,0 +1,31 @@
+<source>
+  @type windows_eventlog2
+  @id windows_eventlog2
+  channels Microsoft-Windows-TerminalServices-LocalSessionManager/Operational
+  read_existing_events false
+  tag windows-rdp
+  rate_limit 200
+  <storage>
+    @type local
+    persistent true
+    path C:\opt\td-agent\winlog.json
+  </storage>
+</source>
+<filter windows-rdp >
+    @type grep
+    <regexp>
+     key EventID
+     pattern /^(?:24|25)$/
+    </regexp>
+</filter>
+<match windows-**>
+    @type forward
+    heartbeat_type tcp
+    flush_interval 3s
+    <server>
+      name master1
+      host 10.70.101.119
+      port 24225
+      #weight 50
+    </server>
+  </match>

@@ -1,0 +1,262 @@
+
+
+vim /etc/sysctl.conf
+net.ipv4.ip_local_reserved_ports = 24224,24225,24226
+
+
+#############################
+##      Input  Forward     ##
+#############################
+<source>
+  @type forward
+  port 24224
+  bind 0.0.0.0
+</source>
+<source>
+  @type forward
+  port 24225
+  bind 0.0.0.0
+</source>
+<source>
+  @type forward
+  port 24226
+  bind 0.0.0.0
+</source>
+<source>
+  @type forward
+  port 24227
+  bind 0.0.0.0
+</source>
+
+#############################
+##      Local  Input       ##
+#############################
+#Audit
+<source>
+  @type tail
+  path /var/log/audit/audit.log
+  pos_file /var/log/td-agent/audit_log.pos
+  tag local-audit
+  <parse>
+    @type regexp
+    expression /(?<message>.+)/
+    time_format %Y-%m-%d %H:%M:%S
+    utc true
+  </parse>
+  refresh_interval 5s
+</source>
+
+<filter local-audit>
+  @type grep
+  <regexp>
+    key message
+    pattern /USER_LOGIN/
+  </regexp>
+</filter>
+
+#Message
+<source>
+  @type tail
+  path /var/log/messages
+  pos_file /var/log/td-agent/messages.pos
+  tag local-messages
+    <parse>
+    @type regexp
+    expression /(?<message>.+)/
+    time_format %Y-%m-%d %H:%M:%S
+    utc true
+  </parse>
+  refresh_interval 5s
+</source>
+
+
+#############################
+##       Local  output     ##
+#############################
+#Audit
+<match local-audit>
+  @type file
+  buffer_path /obj/logs/local/audit/buffer
+  path /obj/logs/local/audit/audit
+  #add_path_suffix true
+  #path_suffix ".log"
+  #append true
+  <buffer>
+    @type file
+    path /obj/logs/local/audit
+    timekey 1d
+    timekey_wait 10s
+    chunk_limit_size 256m
+  </buffer>
+  #<format>
+  #  @type out_file
+  #  output_tag false
+  #  output_time true
+  #</format>
+</match>
+
+#Message
+<match local-messages>
+  @type file
+  buffer_path /obj/logs/local/messages/buffer
+  path /obj/logs/local/messages/messages
+  #add_path_suffix true
+  #path_suffix ".log"
+  #append true
+  <buffer>
+    @type file
+    path /obj/logs/local/messages
+    timekey 1d
+    timekey_wait 10s
+    chunk_limit_size 256m
+</buffer>
+  #<format>
+  #  @type out_file
+  #  output_tag false
+  #  output_time true
+  #</format>
+</match>
+
+#############################
+##     hd-master output    ##
+#############################
+#Audit
+<match hd-master-audit>
+  @type file
+  buffer_path /obj/logs/hd-master/audit/buffer
+  path /obj/logs/hd-master/audit/audit
+  #add_path_suffix true
+  #path_suffix ".log"
+  #append true
+  <buffer>
+    @type file
+    path /obj/logs/hd-master/audit
+    timekey 1d
+    timekey_wait 10s
+    chunk_limit_size 256m
+  </buffer>
+  #<format>
+  #  @type out_file
+  #  output_tag false
+  #  output_time true
+  #</format>
+</match>
+
+#Message
+<match hd-master-messages>
+  @type file
+  buffer_path /obj/logs/hd-master/messages/buffer
+  path /obj/logs/hd-master/messages/messages
+  #add_path_suffix true
+  #path_suffix ".log"
+  #append true
+  <buffer>
+    @type file
+    path /obj/logs/hd-master/messages
+    timekey 1d
+    timekey_wait 10s
+    chunk_limit_size 256m
+</buffer>
+  #<format>
+  #  @type out_file
+  #  output_tag false
+  #  output_time true
+  #</format>
+</match>
+
+
+
+
+#############################
+##     hd-data1 output     ##
+#############################
+#Audit
+<match hd-data1-audit>
+  @type file
+  buffer_path /obj/logs/hd-data1/audit/buffer
+  path /obj/logs/hd-data1/audit/audit
+  #add_path_suffix true
+  #path_suffix ".log"
+  #append true
+  <buffer>
+    @type file
+    path /obj/logs/hd-data1/audit
+    timekey 1d
+    timekey_wait 10s
+    chunk_limit_size 256m
+  </buffer>
+  #<format>
+  #  @type out_file
+  #  output_tag false
+  #  output_time true
+  #</format>
+</match>
+
+#Message
+<match hd-data1-messages>
+  @type file
+  buffer_path /obj/logs/hd-data1/messages/buffer
+  path /obj/logs/hd-data1/messages/messages
+  #add_path_suffix true
+  #path_suffix ".log"
+  #append true
+  <buffer>
+    @type file
+    path /obj/logs/hd-data1/messages
+    timekey 1d
+    timekey_wait 10s
+    chunk_limit_size 256m
+</buffer>
+  #<format>
+  #  @type out_file
+  #  output_tag false
+  #  output_time true
+  #</format>
+</match>
+
+#############################
+##     hd-data2 output     ##
+#############################
+#Audit
+<match hd-data2-audit>
+  @type file
+  buffer_path /obj/logs/hd-data2/audit/buffer
+  path /obj/logs/hd-data2/audit/audit
+  #add_path_suffix true
+  #path_suffix ".log"
+  #append true
+  <buffer>
+    @type file
+    path /obj/logs/hd-data2/audit
+    timekey 1d
+    timekey_wait 10s
+    chunk_limit_size 256m
+  </buffer>
+  #<format>
+  #  @type out_file
+  #  output_tag false
+  #  output_time true
+  #</format>
+</match>
+
+#Message
+<match hd-data2-messages>
+  @type file
+  buffer_path /obj/logs/hd-data2/messages/buffer
+  path /obj/logs/hd-data2/messages/messages
+  #add_path_suffix true
+  #path_suffix ".log"
+  #append true
+  <buffer>
+    @type file
+    path /obj/logs/hd-data2/messages
+    timekey 1d
+    timekey_wait 10s
+    chunk_limit_size 256m
+</buffer>
+  #<format>
+  #  @type out_file
+  #  output_tag false
+  #  output_time true
+  #</format>
+</match>

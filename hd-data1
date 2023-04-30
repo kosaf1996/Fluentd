@@ -1,0 +1,52 @@
+#############################
+##      Input  Source      ##
+#############################
+#Audit
+<source>
+  @type tail
+  path /var/log/audit/audit.log
+  pos_file /var/log/td-agent/audit_log.pos
+  tag hd-data1-audit
+  <parse>
+    @type regexp
+    expression /(?<message>.+)/
+    time_format %Y-%m-%d %H:%M:%S
+    utc true
+  </parse>
+  refresh_interval 5s
+</source>
+<filter hd-data1-audit>
+    @type grep
+    <regexp>
+      key message
+      pattern /USER_LOGIN/
+    </regexp>
+  </filter>
+
+#Message
+<source>
+  @type tail
+  path /var/log/messages
+  pos_file /var/log/td-agent/messages.pos
+  tag hd-data1-messages
+    <parse>
+    @type regexp
+    expression /(?<message>.+)/
+    time_format %Y-%m-%d %H:%M:%S
+    utc true
+  </parse>
+  refresh_interval 5s
+</source>
+
+#############################
+##      Output  Forward    ##
+#############################
+<match hd-data1-**>
+  @type forward
+  heartbeat_type tcp
+  flush_interval 3s
+  <server>
+    host 10.70.101.119
+    port 24225
+  </server>
+</match>
